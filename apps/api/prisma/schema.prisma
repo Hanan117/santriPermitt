@@ -1,0 +1,107 @@
+// SantriPermit - Prisma Schema
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ──
+enum Role {
+  SANTRI
+  WALI
+  ADMIN
+}
+
+enum JenisIzin {
+  KELUAR
+  PULANG
+}
+
+enum StatusIzin {
+  MENUNGGU
+  DISETUJUI
+  DITOLAK
+  SEDANG_KELUAR
+  SUDAH_KEMBALI
+}
+
+// ── Models ──
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  role      Role     @default(SANTRI)
+  santriId  String?  @unique
+  santri    Santri?  @relation(fields: [santriId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Santri {
+  id        String   @id @default(cuid())
+  nis       String   @unique
+  nama      String
+  kelas     String
+  kamar     String
+  foto      String?
+  alamat    String?
+  noHp      String?
+  users     User[]
+  permissions Permission[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([nama])
+  @@index([kelas])
+}
+
+model Permission {
+  id              String      @id @default(cuid())
+  santriId        String
+  santri          Santri      @relation(fields: [santriId], references: [id], onDelete: Cascade)
+
+  jenisIzin       JenisIzin
+  tujuan          String
+  alasan          String      @db.Text
+  keterangan      String?     @db.Text
+
+  tanggalKeluar   DateTime    @db.Date
+  jamKeluar       String      // "08:00"
+  tanggalKembali  DateTime    @db.Date
+  jamKembali      String      // "17:00"
+
+  status          StatusIzin  @default(MENUNGGU)
+  rejectionReason String?     @db.Text
+
+  approvedById    String?
+  approvedAt      DateTime?
+  checkedOutAt    DateTime?
+  checkedInAt     DateTime?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([santriId])
+  @@index([status])
+  @@index([jenisIzin])
+  @@index([createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  type      String?  // "approval", "rejection", "reminder", "new_request"
+  relatedId String?  // permission id
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+}
