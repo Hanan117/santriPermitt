@@ -1,0 +1,69 @@
+{
+  // ══ TypeScript LSP — ENABLE ══
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.tsserver.useSyntaxServer": "auto",
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.suggest.autoImports": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.inlayHints.parameterNames.enabled": "literals",
+
+  // ══ Next.js LSP (via TS plugin) ══
+  // apps/web/tsconfig.json sudah punya "plugins": [{ "name": "next" }]
+  // Pastikan Next.js plugin aktif otomatis saat TS SDK workspace dipakai
+
+  // ══ Prisma LSP — ENABLE ══
+  "prisma.showPrismaDataPlatformNotification": false,
+  "prisma.trace.server": "off",
+
+  // ══ Tailwind CSS LSP — ENABLE (v4) ══
+  "tailwindCSS.enable": true,
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["clsx\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ],
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+
+  // ══ ESLint / Oxlint LSP — ENABLE ══
+  "eslint.enable": true,
+  "eslint.useFlatConfig": true,
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+
+  // ══ Editor LSP general — ENABLE ══
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.semanticHighlighting.enabled": true,
+  "editor.inlayHints.enabled": "on",
+
+  // ══ Disable flag yang sering bikin LSP mati — pastikan tidak disable ══
+  // Jangan set "typescript.disabled" atau "prisma.enable": false
+
+  "search.exclude": {
+    "**/.turbo": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/node_modules": true
+  },
+  "files.watcherExclude": {
+    "**/.next/**": true,
+    "**/dist/**": true,
+    "**/.turbo/**": true
+  }
+}

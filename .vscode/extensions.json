@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "prisma.prisma",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "oxc.oxc-vscode",
+    "ms-vscode.vscode-typescript-next",
+    "ms-vscode.vscode-json"
+  ]
+}

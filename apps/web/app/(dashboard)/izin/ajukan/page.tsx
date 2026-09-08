@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const jenisOptions = ["IZIN_KELUAR", "IZIN_PULANG", "SAKIT", "KEGIATAN"];
+const jenisOptions = ["KELUAR", "PULANG"] as const;
 
 export default function AjukanPage() {
   const router = useRouter();
   const [form, setForm] = React.useState({
-    jenisIzin: "IZIN_KELUAR",
+    jenisIzin: "KELUAR",
     tujuan: "",
     alasan: "",
     keterangan: "",
