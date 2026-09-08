@@ -42,8 +42,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }
   if (isAdmin) {
-    links.push({ href: "/izin/riwayat", label: "Perizinan" });
-    links.push({ href: "/santri", label: "Santri" });
+    links.push({ href: "/admin/perizinan", label: "Perizinan" });
+    links.push({ href: "/admin/santri", label: "Santri" });
   }
   // Deduplicate by href
   const uniqueLinks = links.filter((v, i, a) => a.findIndex((x) => x.href === v.href) === i);
