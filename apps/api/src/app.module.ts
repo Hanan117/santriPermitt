@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { SantriModule } from './modules/santri/santri.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
+import { PermissionsModule } from './modules/permissions/permissions.module.js';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     UsersModule,
     SantriModule,
     NotificationsModule,
+    PermissionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
