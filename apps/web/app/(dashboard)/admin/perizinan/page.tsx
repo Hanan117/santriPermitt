@@ -4,7 +4,6 @@ import { apiFetch } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
 type Permission = {
   id: string;
@@ -50,7 +49,10 @@ export default function AdminPerizinanPage() {
     finally { setLoading(false); }
   }, [page, status]);
 
-  React.useEffect(() => { fetchData(); }, [fetchData]);
+  React.useEffect(() => {
+    const t = setTimeout(() => { fetchData(); }, 0);
+    return () => clearTimeout(t);
+  }, [fetchData]);
   React.useEffect(() => { if (toast) { const t = setTimeout(() => setToast(null), 3000); return () => clearTimeout(t); } }, [toast]);
 
   async function approve(id: string) {

@@ -58,7 +58,8 @@ export default function RiwayatPage() {
   }, [page, status, limit]);
 
   React.useEffect(() => {
-    fetchData();
+    const t = setTimeout(() => { fetchData(); }, 0);
+    return () => clearTimeout(t);
   }, [fetchData]);
 
   const totalPages = Math.max(1, Math.ceil(total / limit));

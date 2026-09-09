@@ -26,9 +26,9 @@ export function Header({ me }: { me: Me | null }) {
   }, []);
 
   React.useEffect(() => {
-    fetchNotifs();
+    const t = setTimeout(() => { fetchNotifs(); }, 0);
     const id = setInterval(fetchNotifs, 30000);
-    return () => clearInterval(id);
+    return () => { clearTimeout(t); clearInterval(id); };
   }, [fetchNotifs]);
 
   function handleLogout() {

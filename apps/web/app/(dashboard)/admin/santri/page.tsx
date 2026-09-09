@@ -20,12 +20,18 @@ export default function AdminSantriPage() {
 
   const fetchData = React.useCallback(async () => {
     setLoading(true); setError(null);
-    try { const res = await apiFetch<Santri[] | { data: Santri[] }>("/santri"); setData(Array.isArray(res) ? res : (res as any).data ?? []); }
+    try {
+      const res = await apiFetch<Santri[] | { data: Santri[] }>("/santri");
+      setData(Array.isArray(res) ? res : (res.data ?? []));
+    }
     catch (e) { setError(e instanceof Error ? e.message : "Gagal memuat santri"); }
     finally { setLoading(false); }
   }, []);
 
-  React.useEffect(() => { fetchData(); }, [fetchData]);
+  React.useEffect(() => {
+    const t = setTimeout(() => { fetchData(); }, 0);
+    return () => clearTimeout(t);
+  }, [fetchData]);
   React.useEffect(() => { if (toast) { const t = setTimeout(() => setToast(null), 3000); return () => clearTimeout(t); } }, [toast]);
 
   async function handleCreate(e: React.FormEvent) {
