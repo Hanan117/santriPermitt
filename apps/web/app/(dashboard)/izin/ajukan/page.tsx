@@ -62,7 +62,6 @@ export default function AjukanPage() {
       // Include santriId from me or manual input for admin
       const santriId = me?.santriId ?? form.santriId;
       if (santriId) payload.santriId = santriId;
-      else if (me?.role === "ADMIN" && form.santriId) payload.santriId = form.santriId;
 
       await apiFetch("/permissions", {
         method: "POST",

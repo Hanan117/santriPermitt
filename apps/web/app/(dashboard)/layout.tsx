@@ -30,23 +30,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return <div className="flex min-h-screen items-center justify-center">Memuat...</div>;
   }
 
-  const isSantriOrWali = me?.role === "SANTRI" || me?.role === "WALI" || !me?.role;
-  const isAdmin = me?.role === "ADMIN" || me?.role === "PENGASUH";
+  const isAdmin = me?.role === "ADMIN";
 
   const links: { href: string; label: string }[] = [{ href: "/dashboard", label: "Dashboard" }];
-  if (isSantriOrWali || isAdmin) {
-    // Santri/Wali links
-    if (!isAdmin || me?.role === "SANTRI" || me?.role === "WALI") {
-      links.push({ href: "/izin/ajukan", label: "Ajukan Izin" });
-      links.push({ href: "/izin/riwayat", label: "Riwayat" });
-    }
-  }
   if (isAdmin) {
     links.push({ href: "/admin/perizinan", label: "Perizinan" });
     links.push({ href: "/admin/santri", label: "Santri" });
+  } else {
+    // SANTRI, WALI, atau role tak dikenal: alur pengajuan izin.
+    // Otorisasi sesungguhnya ditegakkan di API; ini hanya menu.
+    links.push({ href: "/izin/ajukan", label: "Ajukan Izin" });
+    links.push({ href: "/izin/riwayat", label: "Riwayat" });
   }
-  // Deduplicate by href
-  const uniqueLinks = links.filter((v, i, a) => a.findIndex((x) => x.href === v.href) === i);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -54,7 +49,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex flex-1">
         <aside className="w-56 border-r bg-card p-4">
           <nav className="flex flex-col gap-1">
-            {uniqueLinks.map((l) => {
+            {links.map((l) => {
               const active = pathname === l.href;
               return (
                 <Link
