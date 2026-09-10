@@ -5,6 +5,10 @@ import { apiFetch } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Modal } from "@/components/ui/modal";
+import { SkeletonRows } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type Permission = {
   id: string;
@@ -12,9 +16,13 @@ type Permission = {
   jenisIzin?: string;
   tujuan?: string;
   alasan?: string;
+  keterangan?: string;
   createdAt?: string;
   tanggalKeluar?: string;
   tanggalKembali?: string;
+  jamKeluar?: string;
+  jamKembali?: string;
+  rejectionReason?: string;
 };
 
 function statusVariant(s: string): "warning" | "success" | "danger" | "default" {
@@ -26,6 +34,7 @@ function statusVariant(s: string): "warning" | "success" | "danger" | "default" 
 
 export default function RiwayatPage() {
   const [status, setStatus] = React.useState("");
+  const [q, setQ] = React.useState("");
   const [page, setPage] = React.useState(1);
   const [limit] = React.useState(10);
   const [data, setData] = React.useState<Permission[]>([]);
@@ -62,6 +71,15 @@ export default function RiwayatPage() {
     return () => clearTimeout(t);
   }, [fetchData]);
 
+  const query = q.trim().toLowerCase();
+  const shown = query
+    ? data.filter((p) =>
+        (p.tujuan ?? "").toLowerCase().includes(query) ||
+        (p.jenisIzin ?? "").toLowerCase().includes(query) ||
+        (p.alasan ?? "").toLowerCase().includes(query),
+      )
+    : data;
+
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return (
@@ -69,49 +87,54 @@ export default function RiwayatPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Riwayat Izin</CardTitle>
-          <select
-            value={status}
-            onChange={(e) => {
-              setStatus(e.target.value);
-              setPage(1);
-            }}
-            className="h-9 rounded-md border px-3 text-sm"
-          >
-            <option value="">Semua Status</option>
-            <option value="MENUNGGU">MENUNGGU</option>
-            <option value="DISETUJUI">DISETUJUI</option>
-            <option value="DITOLAK">DITOLAK</option>
-          </select>
+          <Badge variant="info">{total} pengajuan</Badge>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <p>Memuat...</p>
-          ) : error ? (
-            <p className="text-sm text-red-600">{error}</p>
-          ) : data.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Tidak ada data</p>
+          <div className="sticky top-14 z-10 -mx-1 mb-4 flex flex-col gap-2 bg-card/95 px-1 py-2 backdrop-blur sm:flex-row">
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Cari tujuan, jenis, alasan..."
+              className="sm:max-w-xs"
+              aria-label="Cari riwayat"
+            />
+            <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className="h-10 rounded-lg border border-border bg-card px-3 text-sm" aria-label="Filter status">
+              <option value="">Semua Status</option>
+              <option value="MENUNGGU">MENUNGGU</option>
+              <option value="DISETUJUI">DISETUJUI</option>
+              <option value="DITOLAK">DITOLAK</option>
+            </select>
+          </div>
+          {loading ? <SkeletonRows rows={6} /> : error ? (
+            <EmptyState icon="⚠" title="Gagal memuat data" description={error} action={<Button size="sm" onClick={fetchData}>Coba lagi</Button>} />
+          ) : shown.length === 0 ? (
+            <EmptyState
+              icon="📝"
+              title={query ? "Tidak ada hasil" : "Belum ada pengajuan"}
+              description={query ? `Tidak ada yang cocok dengan "${q}".` : "Ajukan izin pertama lewat halaman Ajukan Izin."}
+            />
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-lg border border-border">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left">
-                    <th className="p-2">Jenis</th>
-                    <th className="p-2">Tujuan</th>
-                    <th className="p-2">Status</th>
-                    <th className="p-2">Tanggal</th>
-                    <th className="p-2">Aksi</th>
+                  <tr className="border-b border-border bg-muted/60 text-left">
+                    <th className="p-2.5 font-semibold">Jenis</th>
+                    <th className="p-2.5 font-semibold">Tujuan</th>
+                    <th className="p-2.5 font-semibold">Status</th>
+                    <th className="p-2.5 font-semibold">Tanggal</th>
+                    <th className="p-2.5 font-semibold">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {data.map((p) => (
-                    <tr key={p.id} className="border-b">
-                      <td className="p-2">{p.jenisIzin ?? "-"}</td>
-                      <td className="p-2">{p.tujuan ?? "-"}</td>
-                      <td className="p-2">
-                        <Badge variant={statusVariant(p.status)}>{p.status}</Badge>
+                  {shown.map((p) => (
+                    <tr key={p.id} className="border-b border-border transition-colors last:border-0 hover:bg-card-hover">
+                      <td className="p-2.5">{p.jenisIzin ?? "-"}</td>
+                      <td className="p-2.5 max-w-48 truncate">{p.tujuan ?? "-"}</td>
+                      <td className="p-2.5">
+                        <Badge variant={statusVariant(p.status)} dot>{p.status}</Badge>
                       </td>
-                      <td className="p-2">{p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "-"}</td>
-                      <td className="p-2">
+                      <td className="p-2.5 whitespace-nowrap">{p.createdAt ? new Date(p.createdAt).toLocaleDateString("id-ID") : "-"}</td>
+                      <td className="p-2.5">
                         <Button size="sm" variant="outline" onClick={() => setSelected(p)}>
                           Detail
                         </Button>
@@ -138,36 +161,35 @@ export default function RiwayatPage() {
         </CardContent>
       </Card>
 
-      {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setSelected(null)}>
-          <div className="w-full max-w-md rounded-lg bg-card p-6" onClick={(e) => e.stopPropagation()}>
-            <h3 className="mb-4 text-lg font-semibold">Detail Izin</h3>
-            <div className="space-y-2 text-sm">
-              <p>
-                <span className="font-medium">Status:</span> <Badge variant={statusVariant(selected.status)}>{selected.status}</Badge>
-              </p>
-              <p>
-                <span className="font-medium">Jenis:</span> {selected.jenisIzin ?? "-"}
-              </p>
-              <p>
-                <span className="font-medium">Tujuan:</span> {selected.tujuan ?? "-"}
-              </p>
-              <p>
-                <span className="font-medium">Alasan:</span> {selected.alasan ?? "-"}
-              </p>
-              <p>
-                <span className="font-medium">Keluar:</span> {selected.tanggalKeluar ?? "-"}
-              </p>
-              <p>
-                <span className="font-medium">Kembali:</span> {selected.tanggalKembali ?? "-"}
-              </p>
+      <Modal
+        open={selected !== null}
+        onClose={() => setSelected(null)}
+        title="Detail Izin"
+        footer={null}
+      >
+        {selected && (
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Status:</span>
+              <Badge variant={statusVariant(selected.status)} dot>{selected.status}</Badge>
             </div>
-            <Button className="mt-4 w-full" variant="outline" onClick={() => setSelected(null)}>
+            <dl className="grid grid-cols-[110px_1fr] gap-x-3 gap-y-1.5">
+              <dt className="text-muted-foreground">Jenis</dt><dd className="font-medium">{selected.jenisIzin ?? "-"}</dd>
+              <dt className="text-muted-foreground">Tujuan</dt><dd className="font-medium">{selected.tujuan ?? "-"}</dd>
+              <dt className="text-muted-foreground">Alasan</dt><dd>{selected.alasan ?? "-"}</dd>
+              {selected.keterangan && (<><dt className="text-muted-foreground">Keterangan</dt><dd>{selected.keterangan}</dd></>)}
+              <dt className="text-muted-foreground">Keluar</dt>
+              <dd>{selected.tanggalKeluar ?? "-"}{selected.jamKeluar ? ` • ${selected.jamKeluar}` : ""}</dd>
+              <dt className="text-muted-foreground">Kembali</dt>
+              <dd>{selected.tanggalKembali ?? "-"}{selected.jamKembali ? ` • ${selected.jamKembali}` : ""}</dd>
+              {selected.rejectionReason && (<><dt className="text-muted-foreground">Alasan tolak</dt><dd className="text-red-600">{selected.rejectionReason}</dd></>)}
+            </dl>
+            <Button className="w-full" variant="outline" onClick={() => setSelected(null)}>
               Tutup
             </Button>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   );
 }

@@ -55,12 +55,14 @@ export function Modal({
         <h3 className="text-lg font-semibold">{title}</h3>
         {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
         {children && <div className="mt-4">{children}</div>}
-        {footer ?? (
+        {footer === undefined ? (
           <div className="mt-4 flex justify-end">
             <Button variant="outline" onClick={onClose}>
               Tutup
             </Button>
           </div>
+        ) : (
+          footer
         )}
       </div>
     </div>
