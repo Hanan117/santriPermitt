@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { Header } from "@/components/header";
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
 type Me = { id: string; role: string; username?: string; santriId?: string };
@@ -53,7 +54,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [router]);
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center">Memuat...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center" aria-busy="true" aria-label="Memuat">
+        <Spinner className="h-8 w-8 text-primary" />
+      </div>
+    );
   }
 
   const isAdmin = me?.role === "ADMIN";
