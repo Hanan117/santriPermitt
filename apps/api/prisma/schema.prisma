@@ -39,6 +39,8 @@ model User {
   role      Role     @default(SANTRI)
   santriId  String?
   santri    Santri?  @relation(fields: [santriId], references: [id])
+  phone     String?
+  avatar    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -56,6 +58,7 @@ model Santri {
   noHp      String?
   users     User[]
   permissions Permission[]
+  waliLinks WaliSantri[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@index([nama])
@@ -106,4 +109,39 @@ model Notification {
 
   @@index([userId])
   @@index([isRead])
+}
+
+model WaliSantri {
+  santriId   String
+  waliUserId String
+  hubungan   String   @default("Wali")
+  createdAt  DateTime @default(now())
+  santri     Santri   @relation(fields: [santriId], references: [id], onDelete: Cascade)
+
+  @@id([santriId, waliUserId])
+  @@index([waliUserId])
+}
+
+model SystemRule {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([key])
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  userId    String?
+  nama      String
+  email     String?
+  pesan     String   @db.Text
+  status    String   @default("NEW")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
