@@ -36,3 +36,13 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+nul
+*.tsbuildinfo
+
+# Local uploads (served from disk in dev, Supabase Storage in prod)
+apps/api/public/uploads/*
+!apps/api/public/uploads/.gitkeep
+
+# Local plans / large docs (keep tracked .md history, ignore new binaries)
+docs/superpowers/plans/*.pdf
+docs/superpowers/plans/*.docx*
