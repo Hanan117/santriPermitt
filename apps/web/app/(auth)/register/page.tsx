@@ -2,40 +2,27 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
-import { setToken } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-
-const DEMO_ACCOUNTS = [
-  { label: "Admin", username: "admin", password: "admin123" },
-  { label: "Santri", username: "santri1", password: "santri123" },
-  { label: "Wali", username: "wali1", password: "wali123" },
-];
 
 const HIGHLIGHTS = [
-  { title: "Pengajuan digital", desc: "Izin keluar & pulang tanpa kertas, tercatat rapi." },
-  { title: "Persetujuan cepat", desc: "Admin/Pengasuh menyetujui atau menolak dalam sekejap." },
-  { title: "Notifikasi real-time", desc: "Santri & wali selalu tahu status izin terkini." },
+  { title: "Akun dalam semenit", desc: "Cukup username, email, dan password." },
+  { title: "Pilih peranmu", desc: "Daftar sebagai santri atau wali santri." },
+  { title: "Diverifikasi admin", desc: "Admin menautkan akunmu ke data santri." },
 ];
 
-export default function LoginPage() {
-  return (
-    <React.Suspense fallback={null}>
-      <LoginForm />
-    </React.Suspense>
-  );
-}
+const roleOptions = ["SANTRI", "WALI"] as const;
 
-function LoginForm() {
+export default function RegisterPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const registered = searchParams.get("registered") === "1";
-  const [usernameOrEmail, setUsernameOrEmail] = React.useState("");
+  const [username, setUsername] = React.useState("");
+  const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [confirm, setConfirm] = React.useState("");
+  const [role, setRole] = React.useState<(typeof roleOptions)[number]>("SANTRI");
   const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
@@ -55,19 +42,26 @@ function LoginForm() {
     e.preventDefault();
     setError(null);
     setFieldErrors({});
+    const fe: Record<string, string> = {};
+    if (username.trim().length < 3) fe.username = "Username minimal 3 karakter";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) fe.email = "Email tidak valid";
+    if (password.length < 6) fe.password = "Password minimal 6 karakter";
+    if (confirm !== password) fe.confirm = "Konfirmasi tidak sama dengan password";
+    setFieldErrors(fe);
+    if (Object.keys(fe).length > 0) return;
     setLoading(true);
     try {
-      const res = await apiFetch<{ access_token: string; user: unknown }>(
-        "/auth/login",
+      const res = await apiFetch<{ message?: string; user: unknown }>(
+        "/auth/register",
         {
           method: "POST",
-          body: JSON.stringify({ usernameOrEmail: usernameOrEmail.trim(), password }),
+          body: JSON.stringify({ username: username.trim(), email: email.trim(), password, role }),
         },
       );
-      setToken(res.access_token);
-      router.push("/dashboard");
+      void res;
+      router.push("/login?registered=1");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Login gagal";
+      const message = err instanceof Error ? err.message : "Pendaftaran gagal";
       const lower = message.toLowerCase();
       if (
         lower.includes("network") ||
@@ -77,22 +71,15 @@ function LoginForm() {
         lower.includes("connection refused")
       ) {
         setError("Tidak dapat terhubung ke server. Pastikan API jalan di http://localhost:3001 lalu coba lagi.");
-      } else if (lower.includes("unauthorized") || lower.includes("invalid") || lower.includes("credential")) {
-        setError("Username/email atau password salah. Silakan coba lagi.");
-        setFieldErrors({ password: "Kredensial tidak valid" });
+      } else if (lower.includes("terdaftar") || lower.includes("conflict") || lower.includes("409")) {
+        setError("Username atau email sudah terdaftar. Gunakan yang lain atau masuk.");
+        setFieldErrors({ username: "Sudah terdaftar", email: "Sudah terdaftar" });
       } else {
         setError(message);
       }
     } finally {
       setLoading(false);
     }
-  }
-
-  function fillDemo(username: string, pwd: string) {
-    setUsernameOrEmail(username);
-    setPassword(pwd);
-    setError(null);
-    setFieldErrors({});
   }
 
   return (
@@ -116,7 +103,7 @@ function LoginForm() {
         </div>
         <div className="relative space-y-6">
           <h2 className="max-w-md text-3xl font-bold leading-tight">
-            Perizinan santri yang tertib, transparan, dan tercatat.
+            Buat akun untuk memantau & mengajukan izin.
           </h2>
           <ul className="space-y-4">
             {HIGHLIGHTS.map((h) => (
@@ -144,29 +131,17 @@ function LoginForm() {
               </span>
               <span className="font-semibold">SantriPermit</span>
             </div>
-            <CardTitle className="text-2xl">Selamat datang kembali</CardTitle>
-            <CardDescription>Masuk untuk melanjutkan</CardDescription>
+            <CardTitle className="text-2xl">Buat akun baru</CardTitle>
+            <CardDescription>Daftar untuk melanjutkan</CardDescription>
           </CardHeader>
           <CardContent>
-            {registered && !error && (
-              <div
-                className="mb-4 flex items-start gap-3 rounded-lg bg-emerald-50 p-3 animate-fade-in dark:bg-emerald-950/40"
-                role="status"
-              >
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
-                    Pendaftaran berhasil, silakan masuk dengan akun barumu.
-                  </p>
-                </div>
-              </div>
-            )}
             {error && (
               <div
                 key={error}
                 className="mb-4 flex items-start gap-3 rounded-lg bg-danger-soft p-3 animate-fade-in"
                 role="alert"
               >
-                <svg className="mt-0.5 flex-shrink-0 h-5 w-5 text-red-600 dark:text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg className="mt-0.5 flex-shrink-0 h-5 w-5 text-red-600 dark:text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="8" x2="12" y2="12" />
                   <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -180,33 +155,76 @@ function LoginForm() {
                   className="flex-shrink-0 rounded p-1 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                   aria-label="Tutup notifikasi"
                 >
-                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                     <line x1="18" y1="6" x2="6" y2="18" />
                     <line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
                 </button>
               </div>
             )}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+              <div className="space-y-2">
+                <span className="text-sm font-medium">Daftar sebagai</span>
+                <div className="flex gap-2" role="group" aria-label="Pilih peran">
+                  {roleOptions.map((o) => (
+                    <button
+                      key={o}
+                      type="button"
+                      onClick={() => setRole(o)}
+                      aria-pressed={role === o}
+                      className={
+                        role === o
+                          ? "flex-1 rounded-lg bg-brand-gradient px-3 py-2 text-sm font-semibold text-white shadow-card"
+                          : "flex-1 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:bg-card-hover"
+                      }
+                    >
+                      {o === "SANTRI" ? "Santri" : "Wali"}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="space-y-1.5">
                 <Input
-                  id="usernameOrEmail"
-                  label="Username atau Email"
-                  value={usernameOrEmail}
+                  id="username"
+                  label="Username"
+                  value={username}
                   onChange={(e) => {
-                    setUsernameOrEmail(e.target.value);
-                    clearFieldError("usernameOrEmail");
+                    setUsername(e.target.value);
+                    clearFieldError("username");
                   }}
-                  onBlur={() => clearFieldError("usernameOrEmail")}
+                  onBlur={() => clearFieldError("username")}
                   placeholder=" "
                   autoComplete="username"
                   required
-                  invalid={!!fieldErrors.usernameOrEmail}
-                  aria-describedby={fieldErrors.usernameOrEmail ? "usernameOrEmail-error" : undefined}
+                  invalid={!!fieldErrors.username}
+                  aria-describedby={fieldErrors.username ? "username-error" : undefined}
                 />
-                {fieldErrors.usernameOrEmail && (
-                  <p id="usernameOrEmail-error" className="text-sm text-red-600 dark:text-red-400 animate-fade-in" role="alert">
-                    {fieldErrors.usernameOrEmail}
+                {fieldErrors.username && (
+                  <p id="username-error" className="text-sm text-red-600 dark:text-red-400 animate-fade-in" role="alert">
+                    {fieldErrors.username}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Input
+                  id="email"
+                  label="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    clearFieldError("email");
+                  }}
+                  onBlur={() => clearFieldError("email")}
+                  placeholder=" "
+                  autoComplete="email"
+                  required
+                  invalid={!!fieldErrors.email}
+                  aria-describedby={fieldErrors.email ? "email-error" : undefined}
+                />
+                {fieldErrors.email && (
+                  <p id="email-error" className="text-sm text-red-600 dark:text-red-400 animate-fade-in" role="alert">
+                    {fieldErrors.email}
                   </p>
                 )}
               </div>
@@ -223,7 +241,7 @@ function LoginForm() {
                     }}
                     onBlur={() => clearFieldError("password")}
                     placeholder=" "
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     required
                     className="pr-14"
                     invalid={!!fieldErrors.password}
@@ -236,12 +254,12 @@ function LoginForm() {
                     className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-150"
                   >
                     {showPassword ? (
-                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                         <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                         <line x1="1" y1="1" x2="23" y2="23" />
                       </svg>
                     ) : (
-                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                         <circle cx="12" cy="12" r="3" />
                       </svg>
@@ -254,34 +272,39 @@ function LoginForm() {
                   </p>
                 )}
               </div>
+              <div className="space-y-1.5">
+                <Input
+                  id="confirm"
+                  label="Konfirmasi password"
+                  type={showPassword ? "text" : "password"}
+                  value={confirm}
+                  onChange={(e) => {
+                    setConfirm(e.target.value);
+                    clearFieldError("confirm");
+                  }}
+                  onBlur={() => clearFieldError("confirm")}
+                  placeholder=" "
+                  autoComplete="new-password"
+                  required
+                  invalid={!!fieldErrors.confirm}
+                  aria-describedby={fieldErrors.confirm ? "confirm-error" : undefined}
+                />
+                {fieldErrors.confirm && (
+                  <p id="confirm-error" className="text-sm text-red-600 dark:text-red-400 animate-fade-in" role="alert">
+                    {fieldErrors.confirm}
+                  </p>
+                )}
+              </div>
               <Button type="submit" className="w-full" loading={loading} disabled={loading}>
-                {loading ? "Memproses..." : "Login"}
+                {loading ? "Mendaftar..." : "Daftar"}
               </Button>
             </form>
             <p className="mt-5 text-center text-sm text-muted-foreground">
-              Belum punya akun?{" "}
-              <Link href="/register" className="font-semibold text-primary hover:underline">
-                Daftar
+              Sudah punya akun?{" "}
+              <Link href="/login" className="font-semibold text-primary hover:underline">
+                Masuk
               </Link>
             </p>
-            <div className="mt-5 rounded-xl border border-border bg-muted/60 p-3">
-              <p className="mb-2 text-xs font-semibold text-muted-foreground">Akun demo — klik untuk isi otomatis:</p>
-              <div className="flex flex-wrap gap-2">
-                {DEMO_ACCOUNTS.map((a) => (
-                  <button
-                    key={a.username}
-                    type="button"
-                    onClick={() => fillDemo(a.username, a.password)}
-                    className={cn(
-                      "rounded-full border border-border bg-card px-3 py-1 text-xs font-medium shadow-sm transition-all duration-150 hover:shadow-card hover:border-primary hover:scale-105",
-                      usernameOrEmail === a.username && "border-primary ring-1 ring-primary/40",
-                    )}
-                  >
-                    {a.label}
-                  </button>
-                ))}
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>

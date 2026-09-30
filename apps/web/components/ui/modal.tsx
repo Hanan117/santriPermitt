@@ -12,6 +12,7 @@ export function Modal({
   children,
   footer,
   className,
+  position = "center",
 }: {
   open: boolean;
   onClose: () => void;
@@ -20,6 +21,7 @@ export function Modal({
   children?: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
+  position?: "center" | "top";
 }) {
   React.useEffect(() => {
     if (!open) return;
@@ -38,7 +40,10 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in"
+      className={cn(
+        "fixed inset-0 z-50 flex justify-center bg-black/50 p-4 animate-fade-in",
+        position === "top" ? "items-start pt-20" : "items-center"
+      )}
       onClick={onClose}
       role="presentation"
     >

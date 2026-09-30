@@ -19,7 +19,7 @@ type Permission = {
   santri?: { nama?: string };
 };
 
-type Me = { role?: string };
+type Me = { role?: string; santriId?: string | null; linked?: boolean };
 
 function Icon({ d }: { d: string }) {
   return (
@@ -40,6 +40,8 @@ function startOfDay(d: Date) {
 export default function DashboardPage() {
   const [list, setList] = React.useState<Permission[]>([]);
   const [isAdmin, setIsAdmin] = React.useState(false);
+  const [isWali, setIsWali] = React.useState(false);
+  const [unlinked, setUnlinked] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -53,6 +55,8 @@ export default function DashboardPage() {
           const items: Permission[] = Array.isArray(res) ? res : (res.data ?? []);
           setList(items);
           setIsAdmin(me?.role === "ADMIN");
+          setIsWali(me?.role === "WALI");
+          setUnlinked(me?.role === "ADMIN" ? false : me?.linked === undefined ? !me?.santriId : !me.linked);
         })
         .catch((e) => setError(e instanceof Error ? e.message : "Gagal memuat dashboard"))
         .finally(() => setLoading(false));
@@ -103,6 +107,23 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {isWali && (
+        <Card>
+          <CardContent className="p-4 text-sm text-muted-foreground">
+            Akun wali hanya untuk memantau. Pengajuan izin dilakukan oleh santri dari akunnya.
+          </CardContent>
+        </Card>
+      )}
+      {unlinked && (
+        <Card className="border-warning/40">
+          <CardContent className="p-4 text-sm">
+            <p className="font-semibold">Akun belum terverifikasi admin.</p>
+            <p className="text-muted-foreground">
+              Akunmu belum tertaut ke data santri. Hubungi admin pondok agar akunmu di-ACC, setelah itu kamu bisa mengajukan (santri) atau memantau (wali).
+            </p>
+          </CardContent>
+        </Card>
+      )}
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
           label="Menunggu persetujuan"

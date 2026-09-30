@@ -23,6 +23,7 @@ type Permission = {
   jamKeluar?: string;
   jamKembali?: string;
   rejectionReason?: string;
+  santri?: { nama?: string };
 };
 
 function statusVariant(s: string): "warning" | "success" | "danger" | "default" {
@@ -42,6 +43,10 @@ export default function RiwayatPage() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [selected, setSelected] = React.useState<Permission | null>(null);
+  // Deep-link dari dashboard wali: /izin/riwayat?santriId=...
+  const [santriFilter] = React.useState(() =>
+    typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("santriId") ?? "" : "",
+  );
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
@@ -49,6 +54,7 @@ export default function RiwayatPage() {
     try {
       const qs = new URLSearchParams({ page: String(page), limit: String(limit) });
       if (status) qs.set("status", status);
+      if (santriFilter) qs.set("santriId", santriFilter);
       const res = await apiFetch<{ data: Permission[]; total?: number; meta?: { total: number } } | Permission[]>(
         `/permissions?${qs.toString()}`,
       );
@@ -64,7 +70,7 @@ export default function RiwayatPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, status, limit]);
+  }, [page, status, limit, santriFilter]);
 
   React.useEffect(() => {
     const t = setTimeout(() => { fetchData(); }, 0);
@@ -86,7 +92,7 @@ export default function RiwayatPage() {
     <div className="space-y-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Riwayat Izin</CardTitle>
+          <CardTitle>Riwayat Izin{santriFilter ? " (1 santri)" : ""}</CardTitle>
           <Badge variant="info">{total} pengajuan</Badge>
         </CardHeader>
         <CardContent>
@@ -118,6 +124,7 @@ export default function RiwayatPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/60 text-left">
+                    <th className="p-2.5 font-semibold">Santri</th>
                     <th className="p-2.5 font-semibold">Jenis</th>
                     <th className="p-2.5 font-semibold">Tujuan</th>
                     <th className="p-2.5 font-semibold">Status</th>
@@ -128,6 +135,7 @@ export default function RiwayatPage() {
                 <tbody>
                   {shown.map((p) => (
                     <tr key={p.id} className="border-b border-border transition-colors last:border-0 hover:bg-card-hover">
+                      <td className="p-2.5 font-medium">{p.santri?.nama ?? "-"}</td>
                       <td className="p-2.5">{p.jenisIzin ?? "-"}</td>
                       <td className="p-2.5 max-w-48 truncate">{p.tujuan ?? "-"}</td>
                       <td className="p-2.5">
@@ -174,6 +182,7 @@ export default function RiwayatPage() {
               <Badge variant={statusVariant(selected.status)} dot>{selected.status}</Badge>
             </div>
             <dl className="grid grid-cols-[110px_1fr] gap-x-3 gap-y-1.5">
+              <dt className="text-muted-foreground">Santri</dt><dd className="font-medium">{selected.santri?.nama ?? "-"}</dd>
               <dt className="text-muted-foreground">Jenis</dt><dd className="font-medium">{selected.jenisIzin ?? "-"}</dd>
               <dt className="text-muted-foreground">Tujuan</dt><dd className="font-medium">{selected.tujuan ?? "-"}</dd>
               <dt className="text-muted-foreground">Alasan</dt><dd>{selected.alasan ?? "-"}</dd>

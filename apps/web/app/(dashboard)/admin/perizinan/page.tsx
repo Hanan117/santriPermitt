@@ -31,6 +31,9 @@ export default function AdminPerizinanPage() {
   const [status, setStatus] = React.useState("");
   const [jenis, setJenis] = React.useState("");
   const [q, setQ] = React.useState("");
+  const [debouncedQ, setDebouncedQ] = React.useState("");
+  const [dari, setDari] = React.useState("");
+  const [sampai, setSampai] = React.useState("");
   const [page, setPage] = React.useState(1);
   const limit = 10;
   const [data, setData] = React.useState<Permission[]>([]);
@@ -49,12 +52,20 @@ export default function AdminPerizinanPage() {
       const qs = new URLSearchParams({ page: String(page), limit: String(limit) });
       if (status) qs.set("status", status);
       if (jenis) qs.set("jenisIzin", jenis);
+      if (debouncedQ.trim()) qs.set("search", debouncedQ.trim());
+      if (dari) qs.set("tanggalDari", dari);
+      if (sampai) qs.set("tanggalSampai", sampai);
       const res = await apiFetch<{ data: Permission[]; total?: number } | Permission[]>(`/permissions?${qs}`);
       if (Array.isArray(res)) { setData(res); setTotal(res.length); }
       else { setData(res.data ?? []); setTotal(res.total ?? res.data?.length ?? 0); }
     } catch (e) { setError(e instanceof Error ? e.message : "Gagal memuat data"); }
     finally { setLoading(false); }
-  }, [page, status, jenis]);
+  }, [page, status, jenis, debouncedQ, dari, sampai]);
+
+  React.useEffect(() => {
+    const t = setTimeout(() => setDebouncedQ(q), 400);
+    return () => clearTimeout(t);
+  }, [q]);
 
   React.useEffect(() => {
     const t = setTimeout(() => { fetchData(); }, 0);
@@ -62,14 +73,7 @@ export default function AdminPerizinanPage() {
   }, [fetchData]);
   React.useEffect(() => { if (toast) { const t = setTimeout(() => setToast(null), 3000); return () => clearTimeout(t); } }, [toast]);
 
-  const query = q.trim().toLowerCase();
-  const shown = query
-    ? data.filter((p) =>
-        (p.santri?.nama ?? "").toLowerCase().includes(query) ||
-        (p.tujuan ?? "").toLowerCase().includes(query) ||
-        (p.santri?.nis ?? "").toLowerCase().includes(query),
-      )
-    : data;
+  const shown = data;
 
   async function approve(id: string) {
     setActionLoading(id);
@@ -93,7 +97,7 @@ export default function AdminPerizinanPage() {
   }
 
   function resetFilters() {
-    setStatus(""); setJenis(""); setQ(""); setPage(1);
+    setStatus(""); setJenis(""); setQ(""); setDebouncedQ(""); setDari(""); setSampai(""); setPage(1);
   }
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
@@ -126,7 +130,21 @@ export default function AdminPerizinanPage() {
                 <option value="KELUAR">KELUAR</option>
                 <option value="PULANG">PULANG</option>
               </select>
-              {(status || jenis || q) && (
+              <Input
+                type="date"
+                value={dari}
+                onChange={(e) => { setDari(e.target.value); setPage(1); }}
+                aria-label="Dari tanggal"
+                className="sm:max-w-44"
+              />
+              <Input
+                type="date"
+                value={sampai}
+                onChange={(e) => { setSampai(e.target.value); setPage(1); }}
+                aria-label="Sampai tanggal"
+                className="sm:max-w-44"
+              />
+              {(status || jenis || q || dari || sampai) && (
                 <Button variant="ghost" size="sm" onClick={resetFilters} className="h-10">
                   Reset
                 </Button>

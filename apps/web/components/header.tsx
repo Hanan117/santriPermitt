@@ -7,7 +7,7 @@ import { apiFetch } from "@/lib/api";
 import { clearToken } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
-type Me = { role?: string; username?: string; santriId?: string };
+type Me = { role?: string; username?: string; santriId?: string; avatar?: string | null };
 
 type Notif = {
   id: string;
@@ -158,6 +158,13 @@ export function Header({ me }: { me: Me | null }) {
                   ))
                 )}
               </div>
+              <Link
+                href="/notifikasi"
+                onClick={() => setOpenPanel(null)}
+                className="block border-t border-border px-4 py-2.5 text-center text-xs font-semibold text-primary hover:underline"
+              >
+                Lihat semua notifikasi
+              </Link>
             </div>
           )}
           <button
@@ -165,17 +172,39 @@ export function Header({ me }: { me: Me | null }) {
             aria-expanded={openPanel === "user"}
             onClick={() => setOpenPanel((p) => (p === "user" ? null : "user"))}
             className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-full bg-brand-gradient text-xs font-bold text-white shadow-card transition-transform active:scale-95",
+              "flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border bg-brand-gradient text-xs font-bold text-white shadow-card transition-transform active:scale-95",
               openPanel === "user" && "ring-2 ring-primary/50",
             )}
           >
-            {initials(me?.username)}
+            {me?.avatar ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={me.avatar}
+                alt={me.username ?? "Avatar"}
+                className="h-full w-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                }}
+              />
+            ) : (
+              initials(me?.username)
+            )}
           </button>
           {openPanel === "user" && (
-            <div className="absolute right-0 top-12 w-56 overflow-hidden rounded-xl border border-border bg-card shadow-pop animate-fade-up">
-              <div className="border-b border-border px-4 py-3">
-                <p className="truncate text-sm font-semibold">{me?.username ?? "-"}</p>
-                <p className="text-xs text-muted-foreground">{me?.role ?? ""}</p>
+            <div className="absolute right-0 top-12 w-64 overflow-hidden rounded-xl border border-border bg-card shadow-pop animate-fade-up">
+              <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-brand-gradient text-xs font-bold text-white">
+                  {me?.avatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={me.avatar} alt={me.username ?? "Avatar"} className="h-full w-full object-cover" />
+                  ) : (
+                    initials(me?.username)
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold">{me?.username ?? "-"}</p>
+                  <p className="truncate text-xs text-muted-foreground">{me?.role ?? ""}</p>
+                </div>
               </div>
               <button
                 onClick={handleLogout}

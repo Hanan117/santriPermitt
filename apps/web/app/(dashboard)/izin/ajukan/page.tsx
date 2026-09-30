@@ -32,9 +32,14 @@ export default function AjukanPage() {
 
   React.useEffect(() => {
     apiFetch<{ role: string; santriId?: string }>("/auth/me")
-      .then(setMe)
+      .then((u) => {
+        setMe(u);
+        if (u?.role === "WALI") {
+          router.replace("/izin/riwayat");
+        }
+      })
       .catch(() => {});
-  }, []);
+  }, [router]);
 
   function update<K extends keyof typeof form>(key: K, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -93,6 +98,22 @@ export default function AjukanPage() {
   }
 
   const isAdmin = me?.role === "ADMIN";
+
+  if (me?.role === "WALI") {
+    return (
+      <Card className="mx-auto max-w-xl">
+        <CardHeader>
+          <CardTitle>Pengajuan oleh santri</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm">
+          <p className="text-muted-foreground">
+            Akun wali hanya untuk memantau. Minta santri mengajukan izin dari akunnya,
+            lalu pantau statusnya di Riwayat dan Notifikasi.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="mx-auto grid max-w-4xl gap-4 lg:grid-cols-3">

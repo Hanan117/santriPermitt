@@ -8,7 +8,7 @@ import { Header } from "@/components/header";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
-type Me = { id: string; role: string; username?: string; santriId?: string };
+type Me = { id: string; role: string; username?: string; santriId?: string; avatar?: string | null };
 
 function Icon({ d, className }: { d: string; className?: string }) {
   return (
@@ -24,6 +24,12 @@ const ICONS: Record<string, string> = {
   "/izin/riwayat": "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5M12 7v5l4 2",
   "/admin/perizinan": "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11",
   "/admin/santri": "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
+  "/wali": "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
+  "/notifikasi": "M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0",
+  "/aturan": "M9 12l2 2 4-4M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9a9 9 0 0 1 0 18c0 4.97 4.03 9 9 9s9-4.03 9-9",
+  "/pengaturan": "M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zM12 6v6l4 2",
+  "/admin/laporan": "M3 3v18h18M9 17V9M14 17V5M19 17v-9",
+  "/hubungi-cs": "M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z",
 };
 
 const TITLES: Record<string, string> = {
@@ -32,6 +38,12 @@ const TITLES: Record<string, string> = {
   "/izin/riwayat": "Riwayat Izin",
   "/admin/perizinan": "Kelola Perizinan",
   "/admin/santri": "Data Santri",
+  "/notifikasi": "Notifikasi",
+  "/wali": "Anak Saya",
+  "/aturan": "Aturan",
+  "/pengaturan": "Pengaturan",
+  "/admin/laporan": "Laporan",
+  "/hubungi-cs": "Hubungi CS",
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -64,14 +76,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const isAdmin = me?.role === "ADMIN";
 
   const links: { href: string; label: string }[] = [{ href: "/dashboard", label: "Dashboard" }];
+  
+  // Common items for all roles
+  links.push({ href: "/aturan", label: "Aturan" });
+  links.push({ href: "/pengaturan", label: "Pengaturan" });
+  links.push({ href: "/hubungi-cs", label: "Hubungi CS" });
+
   if (isAdmin) {
     links.push({ href: "/admin/perizinan", label: "Perizinan" });
     links.push({ href: "/admin/santri", label: "Santri" });
+    links.push({ href: "/admin/laporan", label: "Laporan" });
+  } else if (me?.role === "WALI") {
+    // WALI is read-only: monitor + notifications only, no ajukan.
+    links.push({ href: "/wali", label: "Anak Saya" });
+    links.push({ href: "/izin/riwayat", label: "Riwayat" });
+    links.push({ href: "/notifikasi", label: "Notifikasi" });
   } else {
     // SANTRI, WALI, atau role tak dikenal: alur pengajuan izin.
     // Otorisasi sesungguhnya ditegakkan di API; ini hanya menu.
     links.push({ href: "/izin/ajukan", label: "Ajukan Izin" });
     links.push({ href: "/izin/riwayat", label: "Riwayat" });
+    links.push({ href: "/notifikasi", label: "Notifikasi" });
   }
 
   const title = TITLES[pathname] ?? "SantriPermit";
