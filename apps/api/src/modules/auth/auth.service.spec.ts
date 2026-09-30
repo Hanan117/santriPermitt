@@ -19,4 +19,32 @@ describe('AuthService', () => {
     expect(res.access_token).toBe('token');
     expect(res.user.username).toBe('admin');
   });
+
+  it('should register SANTRI as unlinked account', async () => {
+    prisma.user.findFirst.mockResolvedValue(null);
+    prisma.user.create = vi.fn().mockResolvedValue({ id:'2', username:'baru', email:'b@b.id', role:'SANTRI', santriId:null });
+    const res = await service.register({ username:'baru', email:'b@b.id', password:'pass123', role:'SANTRI' });
+    expect(res.user.santriId).toBeNull();
+    expect(prisma.user.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ username:'baru', role:'SANTRI', santriId:null }) }),
+    );
+  });
+
+  it('should not return access_token on register (must login manually)', async () => {
+    prisma.user.findFirst.mockResolvedValue(null);
+    prisma.user.create = vi.fn().mockResolvedValue({ id:'3', username:'baru2', email:'c@c.id', role:'WALI', santriId:null });
+    const res: any = await service.register({ username:'baru2', email:'c@c.id', password:'pass123', role:'WALI' });
+    expect(res.access_token).toBeUndefined();
+    expect(jwt.sign).not.toHaveBeenCalled();
+    expect(res.user.username).toBe('baru2');
+  });
+
+  it('should reject ADMIN role on self-register', async () => {
+    await expect(service.register({ username:'x', email:'x@x.id', password:'pass123', role:'ADMIN' })).rejects.toThrow();
+  });
+
+  it('should reject duplicate username on register', async () => {
+    prisma.user.findFirst.mockResolvedValue({ id:'1', username:'baru' });
+    await expect(service.register({ username:'baru', email:'b@b.id', password:'pass123', role:'SANTRI' })).rejects.toThrow();
+  });
 });

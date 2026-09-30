@@ -8,6 +8,9 @@ import { UsersModule } from './modules/users/users.module.js';
 import { SantriModule } from './modules/santri/santri.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { PermissionsModule } from './modules/permissions/permissions.module.js';
+import { WaliModule } from './modules/wali/wali.module.js';
+import { RulesModule } from './modules/rules/rules.module.js';
+import { ContactModule } from './modules/contact/contact.module.js';
 
 @Module({
   imports: [
@@ -21,6 +24,9 @@ import { PermissionsModule } from './modules/permissions/permissions.module.js';
     SantriModule,
     NotificationsModule,
     PermissionsModule,
+    WaliModule,
+    RulesModule,
+    ContactModule,
   ],
   controllers: [AppController],
   providers: [AppService],
