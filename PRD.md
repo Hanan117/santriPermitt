@@ -5,7 +5,7 @@
 ### 1.1 Latar Belakang
 
 Saat ini, sebagian besar pondok pesantren masih mengelola proses perizinan pulang dan keluar santri secara manual — menggunakan buku izin kertas (BIS/Buku Izin Santri) yang harus dibawa santri dan ditandatangani oleh pengurus yang berwenang. Sistem manual ini menimbulkan sejumlah masalah: antrean panjang di pos keamanan, risiko kehilangan atau kerusakan dokumen, tidak adanya rekam jejak yang terstruktur, serta potensi pemalsuan surat izin. Selain itu, orang tua/wali santri seringkali tidak mendapat notifikasi ketika anaknya mendapatkan izin keluar.
-
+    
 **SantriPermit** hadir sebagai solusi digital berbasis web untuk mengelola proses perizinan pulang dan keluar santri secara lebih cepat, transparan, dan akuntabel.
 
 ### 1.2 Tujuan Produk
@@ -37,7 +37,7 @@ Berdasarkan studi sistem perizinan santri yang ada, SantriPermit melibatkan **ti
 |------|-----------|-----------------|
 | **Santri** | Santri yang mengajukan izin keluar/pulang | Mengajukan izin, melihat status, melihat riwayat izin sendiri |
 | **Admin/Musyrif** | Pengurus pondok yang berwenang menyetujui/menolak izin | Mengelola data santri, memproses pengajuan izin, melihat seluruh riwayat |
-| **Wali Santri** | Orang tua/wali santri | Mengajukan izin atas nama santri, menerima notifikasi, memantau riwayat izin anak |
+| **Wali Santri** | Orang tua/wali santri | **Read-only:** memantau riwayat & status izin anak, menerima notifikasi (in-app + WA Fase 2). Tidak dapat mengajukan izin — pengajuan dilakukan santri dari akunnya |
 
 ---
 

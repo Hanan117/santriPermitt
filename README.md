@@ -1,3 +1,19 @@
+# SantriPermit — Cara jalan harian (anti error tiap ganti hari)
+
+Urutan wajib tiap pagi / tiap Docker restart:
+
+```sh
+bun run dev:infra
+docker compose ps            # tunggu postgres healthy / Up
+bun run dev
+```
+
+Cek cepat: `curl http://localhost:3001/api` harus jawab (bukan Connection refused),
+`http://localhost:3000` web, DB di `localhost:5433`.
+
+Kenapa: Postgres butuh recovery 10-60 detik setelah laptop sleep. API kini retry
+connect 10x (2 detik), tapi tetap wajib tunggu postgres healthy dulu.
+
 # Turborepo starter
 
 This Turborepo starter is maintained by the Turborepo core team.

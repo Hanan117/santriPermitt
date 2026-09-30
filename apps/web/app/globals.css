@@ -1,11 +1,18 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f9fafb;
   --foreground: #1f2937;
 }
 
-@theme inline {
+.dark {
+  --background: #07120e;
+  --foreground: #e7efec;
+}
+
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -25,6 +32,74 @@
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
   --color-info: #3b82f6;
+
+  /* Premium surface tokens */
+  --color-card-hover: #fbfdfc;
+  --color-success-soft: #d1fae5;
+  --color-warning-soft: #fef3c7;
+  --color-danger-soft: #fee2e2;
+  --color-info-soft: #dbeafe;
+
+  --shadow-card: 0 1px 2px rgb(6 78 59 / 0.06), 0 4px 16px -4px rgb(6 78 59 / 0.1);
+  --shadow-lift: 0 2px 4px rgb(6 78 59 / 0.08), 0 12px 32px -8px rgb(6 78 59 / 0.22);
+  --shadow-pop: 0 24px 64px -16px rgb(6 78 59 / 0.35);
+
+  /* Motion (150–200ms budget, no lib needed) */
+  --animate-fade-up: fade-up 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in: fade-in 0.2s ease-out both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-shake: shake 0.3s ease-in-out;
+  --animate-float-slow: float-slow 20s ease-in-out infinite;
+  --animate-float-medium: float-medium 15s ease-in-out infinite;
+  --animate-float-fast: float-fast 12s ease-in-out infinite;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  @keyframes float-slow {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -30px) scale(1.05); }
+    66% { transform: translate(-20px, 20px) scale(0.95); }
+  }
+  @keyframes float-medium {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-25px, -40px) scale(1.1); }
+  }
+  @keyframes float-fast {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(15px, 25px) scale(1.08); }
+    75% { transform: translate(-30px, 10px) scale(0.92); }
+  }
+}
+
+/* Dark-mode surface overrides (utilities read these vars, so they flip) */
+.dark {
+  --color-card: #0c1a14;
+  --color-card-hover: #10231a;
+  --color-muted: #122419;
+  --color-muted-foreground: #94a8a0;
+  --color-border: #1d3529;
+  --color-success-soft: #06301f;
+  --color-warning-soft: #3a2a06;
+  --color-danger-soft: #3d0f0f;
+  --color-info-soft: #0e2440;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 16px -4px rgb(0 0 0 / 0.5);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.4), 0 12px 32px -8px rgb(0 0 0 / 0.6);
+  --shadow-pop: 0 24px 64px -16px rgb(0 0 0 / 0.7);
 }
 
 * {
@@ -35,4 +110,33 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Brand gradient helpers */
+.bg-brand-gradient {
+  background-image: linear-gradient(135deg, #059669 0%, #047857 55%, #064e3b 100%);
+}
+
+.text-brand-gradient {
+  background-image: linear-gradient(120deg, #059669, #064e3b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Subtle Islamic geometric pattern (login side panel) */
+.bg-pattern-geometric {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.14' stroke-width='1.5'%3E%3Cpath d='M36 6l8 22 22 8-22 8-8 22-8-22-22-8 22-8z'/%3E%3Ccircle cx='36' cy='36' r='4'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 72px 72px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -40,4 +40,16 @@ export class NotificationsService {
       data: { isRead: true },
     });
   }
+
+  deleteRead(userId: string) {
+    return this.prisma.notification.deleteMany({
+      where: { userId, isRead: true },
+    });
+  }
+
+  async deleteOne(id: string, userId: string) {
+    const n = await this.prisma.notification.findUnique({ where: { id } });
+    if (!n || n.userId !== userId) throw new ForbiddenException();
+    return this.prisma.notification.delete({ where: { id } });
+  }
 }

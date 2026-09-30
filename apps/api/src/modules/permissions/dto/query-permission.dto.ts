@@ -6,6 +6,9 @@ export class QueryPermissionDto {
   @IsOptional() @IsString() santriId?: string;
   @IsOptional() @IsEnum(StatusIzin) status?: StatusIzin;
   @IsOptional() @IsEnum(JenisIzin) jenisIzin?: JenisIzin;
+  @IsOptional() @IsString() search?: string;
+  @IsOptional() @IsString() tanggalDari?: string;
+  @IsOptional() @IsString() tanggalSampai?: string;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) page?: number;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) limit?: number;
 }

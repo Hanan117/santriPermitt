@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service.js';
 import { AuthController } from './auth.controller.js';
 import { JwtStrategy } from './jwt.strategy.js';
+import { WaliModule } from '../wali/wali.module.js';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { JwtStrategy } from './jwt.strategy.js';
         return { secret, signOptions: { expiresIn: config.get('JWT_EXPIRES_IN') ?? '7d' } as any };
       },
     }),
+    WaliModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

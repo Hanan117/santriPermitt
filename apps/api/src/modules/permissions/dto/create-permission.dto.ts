@@ -2,7 +2,7 @@ import { IsString, IsEnum, IsOptional, IsDateString, Matches } from 'class-valid
 import { JenisIzin } from '@prisma/client';
 
 export class CreatePermissionDto {
-  @IsString() santriId!: string;
+  @IsOptional() @IsString() santriId?: string;
   @IsEnum(JenisIzin) jenisIzin!: JenisIzin;
   @IsString() tujuan!: string;
   @IsString() alasan!: string;

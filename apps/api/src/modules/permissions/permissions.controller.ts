@@ -23,12 +23,17 @@ import { QueryPermissionDto } from './dto/query-permission.dto.js';
 export class PermissionsController {
   constructor(private permissionsService: PermissionsService) {}
 
+  @Get('stats')
+  @Roles(Role.ADMIN)
+  getStats() {
+    return this.permissionsService.getStats();
+  }
+
   @Post()
-  @Roles(Role.SANTRI, Role.WALI, Role.ADMIN)
+  @Roles(Role.SANTRI, Role.ADMIN)
   create(@Body() dto: CreatePermissionDto, @CurrentUser() user: any) {
-    // Additional guard: SANTRI/WALI only; ADMIN allowed via same route
-    // Roles decorator above allows all three, but brief says SANTRI/WALI scoping.
-    // Keep ADMIN allowed for flexibility.
+    // WALI is read-only (monitor + notifications); only SANTRI/ADMIN may create.
+    // Service also enforces this with a 403 for defense in depth.
     return this.permissionsService.create(dto, user);
   }
 
