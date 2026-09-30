@@ -6,8 +6,11 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Supabase: DATABASE_URL = pooler (6543, ?pgbouncer=true) untuk runtime,
+  // DIRECT_URL = direct (5432) untuk migrate. Lokal: isi keduanya sama.
+  directUrl = env("DIRECT_URL")
 }
 
 // ── Enums ──

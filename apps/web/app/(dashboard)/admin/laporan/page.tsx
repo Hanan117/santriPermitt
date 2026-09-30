@@ -4,7 +4,6 @@ import * as React from "react";
 import { apiFetch } from "@/lib/api";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { cn } from "@/lib/utils";
 
 type Stats = {
   total: number;

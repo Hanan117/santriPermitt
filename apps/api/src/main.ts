@@ -26,12 +26,14 @@ async function bootstrap() {
   );
 
   // Ensure upload dir exists and serve static
+  // UPLOAD_DIR bisa di-override via env (prod: mount volume ke path itu)
   const uploadDir = join(process.cwd(), 'public', 'uploads');
-  if (!existsSync(uploadDir)) mkdirSync(uploadDir, { recursive: true });
+  const configuredDir = process.env.UPLOAD_DIR?.trim() || uploadDir;
+  if (!existsSync(configuredDir)) mkdirSync(configuredDir, { recursive: true });
   // also ensure dist path works after build
   const distPublic = join(__dirname, '..', 'public');
   if (!existsSync(distPublic)) mkdirSync(distPublic, { recursive: true });
-  app.use('/uploads', express.static(uploadDir));
+  app.use('/uploads', express.static(configuredDir));
 
   const port = process.env.PORT ?? 3001;
   await app.listen(port, '0.0.0.0');

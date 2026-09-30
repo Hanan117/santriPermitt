@@ -17,8 +17,9 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { RulesService } from './rules.service.js';
 import { UpdateRulesDto } from './dto/rules.dto.js';
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
+import { extname } from 'path';
 import { existsSync, mkdirSync } from 'fs';
+import { resolveUploadDir } from '../../common/upload-dir.js';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 const PDF_MIME_TYPE = 'application/pdf';
@@ -53,7 +54,7 @@ export class RulesController {
     FileInterceptor('file', {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const dir = join(process.cwd(), 'public', 'uploads');
+          const dir = resolveUploadDir();
           if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
           cb(null, dir);
         },

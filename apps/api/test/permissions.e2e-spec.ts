@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { Test } from '@nestjs/testing';
-import { INestApplication, ValidationPipe, ForbiddenException } from '@nestjs/common';
+import { ValidationPipe, ForbiddenException } from '@nestjs/common';
 import request from 'supertest';
 import { PermissionsController } from '../src/modules/permissions/permissions.controller.js';
 import { PermissionsService } from '../src/modules/permissions/permissions.service.js';

@@ -1,4 +1,4 @@
-import { IsString, IsOptional, ValidateIf } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class UpdateRulesDto {
   @IsOptional() @IsString() rulesPdf?: string;

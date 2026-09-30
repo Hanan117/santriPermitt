@@ -24,8 +24,9 @@ import { UpdateMeDto } from './dto/update-me.dto.js';
 import { DeleteMeDto } from './dto/delete-me.dto.js';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
+import { extname } from 'path';
 import { existsSync, mkdirSync } from 'fs';
+import { resolveUploadDir } from '../../common/upload-dir.js';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -70,7 +71,7 @@ export class UsersController {
     FileInterceptor('file', {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const dir = join(process.cwd(), 'public', 'uploads');
+          const dir = resolveUploadDir();
           if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
           cb(null, dir);
         },
