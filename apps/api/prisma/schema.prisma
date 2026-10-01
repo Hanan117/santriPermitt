@@ -3,9 +3,8 @@
 
 generator client {
   provider      = "prisma-client-js"
-  // Railway runtime bisa OpenSSL 1.1.x atau 3.0.x tergantung base image —
-  // unduh kedua engine agar Query Engine selalu ketemu.
-  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
+  // Runtime Railway butuh OpenSSL 1.1.x — unduh engine itu selain native.
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
 }
 
 datasource db {
