@@ -2,7 +2,10 @@
 // Docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // Railway runtime bisa OpenSSL 1.1.x atau 3.0.x tergantung base image —
+  // unduh kedua engine agar Query Engine selalu ketemu.
+  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {
