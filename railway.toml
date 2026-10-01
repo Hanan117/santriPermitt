@@ -6,6 +6,9 @@ builder = "DOCKERFILE"
 dockerfilePath = "apps/api/Dockerfile"
 
 [deploy]
+# Samakan dengan CMD di apps/api/Dockerfile: migrate dulu (DIRECT_URL), baru start (DATABASE_URL).
+# Dikunci eksplisit agar Railway tidak auto-detect `bun` dari bun.lock.
+startCommand = "node /app/node_modules/prisma/build/index.js migrate deploy --schema prisma/schema.prisma || node ./node_modules/prisma/build/index.js migrate deploy --schema prisma/schema.prisma; node dist/main"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 5
 healthcheckPath = "/api"
